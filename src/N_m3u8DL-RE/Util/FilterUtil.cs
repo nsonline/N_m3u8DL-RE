@@ -5,6 +5,7 @@ using N_m3u8DL_RE.Common.Resource;
 using N_m3u8DL_RE.Entity;
 using Spectre.Console;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -56,6 +57,18 @@ namespace N_m3u8DL_RE.Util
                 inputs = inputs.Take(1).ToList();
             else if (filter.For == "worst" && inputs.Count() > 0)
                 inputs = inputs.TakeLast(1).ToList();
+            else if (filter.For == "optimum" && inputs.Count() > 0)
+            {
+                var optimums = new Dictionary<string, StreamSpec>();
+                foreach (var item in inputs)
+                {
+                    if (!optimums.ContainsKey(item.Language))
+                        optimums.TryAdd(item.Language, item);
+                    else if (item.Bandwidth > optimums[item.Language].Bandwidth)
+                        optimums[item.Language] = item;
+                }
+                inputs = optimums.Values.ToList();
+            }
             else if (int.TryParse(bestNumberStr, out int bestNumber) && inputs.Count() > 0)
                 inputs = inputs.Take(bestNumber).ToList();
             else if (int.TryParse(worstNumberStr, out int worstNumber) && inputs.Count() > 0)
